@@ -72,6 +72,7 @@ export default class ThermostatUI {
     this._root.addEventListener('click', () => this._enableControls());
     this._container.appendChild(this._buildDialog());
     this._main_icon.addEventListener('click', () => this._openDialog());
+    this._modes_dialog.addEventListener('click', () => this._hideDialog());
   }
 
   updateState(options,hass) {
@@ -393,7 +394,7 @@ export default class ThermostatUI {
       }
       let d = document.createElement('span');
       d.innerHTML = `<iron-icon class="modeicon ${mode}" icon="mdi:${icon}"></iron-icon>`
-      d.addEventListener('click', () => this._setMode(mode,hass));
+      d.addEventListener('click', (e) => this._setMode(e,mode,hass));
       //this._modes[i].push(d);
       this._modes_dialog.appendChild(d)
     }
@@ -413,13 +414,22 @@ export default class ThermostatUI {
   _openDialog(){
     this._modes_dialog.className = "dialog modes";
   }
-  _setMode(mode,hass){
+  _hideDialog(){
+    this._modes_dialog.className = "dialog modes hide";
+  }
+  _setMode(e, mode,hass){
     console.log(mode);
+    let config = this._config;
+    if (this._timeoutHandlerMode) clearTimeout(this._timeoutHandlerMode);
     hass.callService('climate', 'set_hvac_mode', {
       entity_id: this._config.entity,
       hvac_mode: mode,
     });
-    this._modes_dialog.className = "dialog modes hide";
+    this._modes_dialog.className = "dialog modes "+mode+" pending";
+    this._timeoutHandlerMode = setTimeout(() => {
+      this._modes_dialog.className = "dialog modes hide";
+    }, config.pending * 1000);
+    e.stopPropagation();
   }
 
   _buildTitle(title) {

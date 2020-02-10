@@ -75,26 +75,34 @@ ha-card.no_card .prop{
   --title_position_top: 22%;
   --set_temperature_font_size: 25px;
   --set_temperature_margin_bottom: -5px;
+  --dialog_size: 90%;
   --icon_size: 24px;
   --d_icon_size: 28px;
   --dot_size: 30px;
+  --c_title_w: 40%;
+  --c_title_l: 30%;
 }
 .c_large_cont {
   padding: 0px;
-  --title_font_size: 24px;
-  --b_padding: 0% 25% 5% 25%;
-  --climate_info_position_top: 80%;
+  --title_position_top: 25%;
+  --title_font_size: 18px;
+  --b_padding: 10% 10% 10% 10%;;
+  --climate_info_position_top: 82%;
   --set_temperature_font_size: 25px;
   --set_temperature_margin_bottom: -5px;
+  --dialog_size: 80%;
   --icon_size: 38px;
   --dot_size: 42px;
+  --d_icon_size: 64px;
+  --c_title_w: 30%;
+  --c_title_l: 35%;
 }
 .c_title {
   font-size: var(--title_font_size);
   text-align: center;
   position: absolute;
-  width: 40%;
-  left: 30%;
+  width: var(--c_title_w);
+  left: var(--c_title_l);
   word-break: break-all;
   top: var(--title_position_top);
   color: var(--text-color)
@@ -134,9 +142,9 @@ ha-card.no_card .prop{
   margin: 8px;
 }
 .dialog{
-  background-color:#272727eb;
-  width: 90%;
-  height: 90%;
+  background-color:#0000008c;
+  width: var(--dialog_size);
+  height: var(--dialog_size);
   margin: 5%;
   border-radius: 50%;
   display: flex;
@@ -146,10 +154,25 @@ ha-card.no_card .prop{
   align-content: center;
   top: 45%;
   left: 45%;
+  backdrop-filter: blur(6px) grayscale(50%);
+  box-shadow: 0px 0px 10px 0px #696969;
+  border: 1px solid #ffffff;
 }
-.hide{
+.dialog.hide{
   display: none;
 }
+.dialog.pending{
+  border: 1px solid var(--mode_color);
+  box-shadow: 0px 0px 10px 0px var(--mode_color);
+  animation: dialog-pending .8s infinite alternate;
+}
+
+@keyframes dialog-pending
+{
+    from {box-shadow: 0px 0px 10px 0px var(--mode_color);}
+    to {box-shadow: 0px 0px 0px 0px var(--mode_color);}
+}
+
 .dot_r{
   height: var(--dot_size);
   width: var(--dot_size);
@@ -168,7 +191,7 @@ ha-card.no_card .prop{
 .dial {
   user-select: none;
 
-  --thermostat-off-fill: #222;
+  --thermostat-off-fill: #000000c2;
   --thermostat-path-color: rgba(255, 255, 255, 0.3);
   --thermostat-path-active-color: rgba(255, 255, 255, 0.8);
   --thermostat-path-active-color-large: rgba(255, 255, 255, 1);
