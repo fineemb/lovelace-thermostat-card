@@ -1,5 +1,5 @@
-import {cssData} from './styles.js?v=0.1.1';
-import ThermostatUI from './thermostat_card.lib.js?v=0.1.1'
+import {cssData} from './dist/styles.js?v=0.1.1';
+import ThermostatUI from './dist/thermostat_card.lib.js?v=0.1.1'
 
 class ThermostatCard extends HTMLElement {
   constructor() {
