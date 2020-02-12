@@ -4,7 +4,7 @@
  * @Description   : 
  * @Date          : 2020-02-03 12:52:45
  * @LastEditors   : fineemb
- * @LastEditTime  : 2020-02-03 13:59:13
+ * @LastEditTime  : 2020-02-12 18:30:09
  -->
 
 # Lovelace Thermostat Card
@@ -25,12 +25,12 @@ A simple thermostat implemented in CSS and SVG based on <a href="https://codepen
 ## HACS Installation
 Search for Thermostat Card
 ## Manual Installation
-1. Download `thermostat-card.js` `thermostat_card.lib.js` `styles.js`
-1. Copy to `www\community\thermostat-card`
+1. Download `main.js` `thermostat_card.lib.js` `styles.js`
+1. Copy to `www\community\lovelace-thermostat-card`
 1. Add the following to your Lovelace resources
     ``` yaml
     resources:
-      - url: /www/community/thermostat-card/thermostat-card.js
+      - url: /www/community/lovelace-thermostat-card/main.js
         type: module
     ```
 1. Add the following to your Lovelace config `views.cards` key
