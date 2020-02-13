@@ -327,16 +327,17 @@ export default class ThermostatUI {
 
   _updateColor(state, preset_mode) {
     
-    if(preset_mode === undefined)
-      return;
-    if(state != 'off' && preset_mode.toLowerCase() == 'idle')
+    if(Object.prototype.toString.call(preset_mode) === "[object String]"){
+
+      if(state != 'off' && preset_mode.toLowerCase() == 'idle')
       state = 'idle'
     
-    this._root.classList.forEach(c => {
-      if (c.indexOf('dial--state--') != -1)
-        this._root.classList.remove(c);
-    });
-    this._root.classList.add('dial--state--' + state);
+      this._root.classList.forEach(c => {
+        if (c.indexOf('dial--state--') != -1)
+          this._root.classList.remove(c);
+      });
+      this._root.classList.add('dial--state--' + state);
+    }
   }
 
   _updateTicks(from, to, large_ticks, hvac_state) {
