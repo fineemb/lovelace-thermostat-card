@@ -1,5 +1,5 @@
 {
   "name": "Climate thermostat card",
   "render_readme": true,
-  "filename":["main.js","styles.js","thermostat_card.lib.js"]
+  "filename":"main.js"
 }
