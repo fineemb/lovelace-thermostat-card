@@ -185,7 +185,7 @@ export default class ThermostatUI {
     
     tick_label.forEach(item => tick_indexes.push(SvgUtil.restrictToRange(Math.round((item - this.min_value) / (this.max_value - this.min_value) * config.num_ticks), 0, config.num_ticks - 1)));
     this._updateTicks(from, to, tick_indexes, this.hvac_state);
-    this._updateColor(this.hvac_state, this.preset_mode);
+    // this._updateColor(this.hvac_state, this.preset_mode);
     this._updateText('ambient', this.ambient);
     this._updateEdit(false);
     this._updateDialog(this.hvac_modes,hass);
@@ -331,7 +331,6 @@ export default class ThermostatUI {
 
       if(state != 'off' && preset_mode.toLowerCase() == 'idle')
       state = 'idle'
-    
       this._root.classList.forEach(c => {
         if (c.indexOf('dial--state--') != -1)
           this._root.classList.remove(c);

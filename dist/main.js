@@ -1,6 +1,6 @@
 import {cssData} from './styles.js?v=0.1.1';
 import ThermostatUI from './thermostat_card.lib.js?v=0.1.1';
-
+console.info("%c Thermostat Card \n%c  Version  1.2.8 ", "color: orange; font-weight: bold; background: black", "color: white; font-weight: bold; background: dimgray");
 class ThermostatCard extends HTMLElement {
   constructor() {
     super();
@@ -93,8 +93,8 @@ class ThermostatCard extends HTMLElement {
     if (root.lastChild) root.removeChild(root.lastChild);
 
     // Prepare config defaults
-    const cardConfig = Object.assign({}, config);
-    cardConfig.hvac = Object.assign({}, config.hvac);
+    const cardConfig = deepClone(config);
+    // cardConfig.hvac = Object.assign({}, config.hvac);
     
     if (!cardConfig.diameter) cardConfig.diameter = 400;
     if (!cardConfig.pending) cardConfig.pending = 3;
@@ -140,3 +140,19 @@ class ThermostatCard extends HTMLElement {
   }
 }
 customElements.define('thermostat-card', ThermostatCard);
+
+function deepClone(value) {
+  if (!(!!value && typeof value == 'object')) {
+    return value;
+  }
+  if (Object.prototype.toString.call(value) == '[object Date]') {
+    return new Date(value.getTime());
+  }
+  if (Array.isArray(value)) {
+    return value.map(deepClone);
+  }
+  var result = {};
+  Object.keys(value).forEach(
+    function(key) { result[key] = deepClone(value[key]); });
+  return result;
+}
