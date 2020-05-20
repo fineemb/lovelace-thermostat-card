@@ -393,7 +393,7 @@ export default class ThermostatUI {
           break;
       }
       let d = document.createElement('span');
-      d.innerHTML = `<iron-icon class="modeicon ${mode}" icon="mdi:${icon}"></iron-icon>`
+      d.innerHTML = `<ha-icon class="modeicon ${mode}" icon="mdi:${icon}"></ha-icon>`
       d.addEventListener('click', (e) => this._setMode(e,mode,hass));
       //this._modes[i].push(d);
       this._modes_dialog.appendChild(d)
@@ -455,7 +455,7 @@ export default class ThermostatUI {
     this._main_icon.innerHTML = `
       <div class="climate_info">
         <div class="mode_color"><span class="${ic_dot}"></span></div>
-        <div class="modes"><iron-icon class="${state}" icon="mdi:${ic_name}"></iron-icon></div>
+        <div class="modes"><ha-icon class="${state}" icon="mdi:${ic_name}"></ha-icon></div>
       </div>
     `;
     return this._main_icon;
