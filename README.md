@@ -4,7 +4,7 @@
  * @Description   : 
  * @Date          : 2020-02-03 12:52:45
  * @LastEditors   : fineemb
- * @LastEditTime  : 2020-02-12 18:30:09
+ * @LastEditTime  : 2020-05-31 11:11:26
  -->
 
 # Lovelace Thermostat Card
@@ -22,6 +22,11 @@ A simple thermostat implemented in CSS and SVG based on <a href="https://codepen
 ## Preview
 ![](https://bbs.hassbian.com/data/attachment/forum/202003/14/172544q3ajp7742cbo757h.gif)
 
+## Update
+### v1.3.0
++ fix icon
++ Fix the problem that the title blocks the arrow button [#16](https://github.com/fineemb/lovelace-thermostat-card/issues/16#issue-622934186)
++ Remove the small_i parameter and have done adaptive scaling
 ## HACS Installation
 Search for Thermostat Card
 ## Manual Installation
@@ -50,7 +55,6 @@ Search for Thermostat Card
 | entity | string | **Required** | The entity id of climate entity. Example: `climate.hvac`
 | title | string | optional | Card title
 | no_card | boolean | false | Set to true to avoid the card background and use the custom element in picture-elements.
-| small_i | boolean | false | Set to true if you have 2 climate in one card. Default 1 big card. (Must clear browser cache after chageing this value)
 | step | number | 0.5 | The step to use when increasing or decreasing temperature
 | highlight_tap | boolean | false | Show the tap area highlight when changing temperature settings
 | chevron_size | number | 50 | Size of chevrons for temperature adjutment

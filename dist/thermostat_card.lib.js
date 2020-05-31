@@ -37,10 +37,14 @@ export default class ThermostatUI {
     this._container = document.createElement('div');
     this._main_icon = document.createElement('div');
     this._modes_dialog = document.createElement('div');
-    this._container.className = config.small_i === true ? 'c_small_cont' : 'c_large_cont';
     config.title = config.title === null || config.title === undefined ? 'Title' : config.title
 
-    this._container.appendChild(this._buildTitle(config.title));
+    this._ic = document.createElement('div');
+    this._ic.className = "prop";
+    this._ic.innerHTML = `<ha-icon-button id="more" icon="mdi:dots-vertical" class="c_icon" role="button" tabindex="0" aria-disabled="false"></ha-icon-button>`;
+    this._container.appendChild(this._ic)
+
+    // this._container.appendChild(this._buildTitle(config.title));
     this._ic.addEventListener('click', () => this.openProp());
     this._container.appendChild(this._load_icon('',''));
     this.c_body = document.createElement('div');
@@ -54,6 +58,7 @@ export default class ThermostatUI {
     root.appendChild(this._buildDialSlot(2));
     root.appendChild(this._buildDialSlot(3));
 
+    root.appendChild(this._buildText(config.radius, 'title', 0));
     root.appendChild(this._buildText(config.radius, 'ambient', 0));
     root.appendChild(this._buildText(config.radius, 'target', 0));
     root.appendChild(this._buildText(config.radius, 'low', -config.radius / 2.5));
@@ -64,6 +69,7 @@ export default class ThermostatUI {
     root.appendChild(this._buildChevrons(config.radius, 180, 'low', 0.7, -config.radius / 2.5));
     root.appendChild(this._buildChevrons(config.radius, 180, 'high', 0.7, config.radius / 3));
     root.appendChild(this._buildChevrons(config.radius, 180, 'target', 1, 0));
+    
 
     this.c_body.appendChild(root);
     this._container.appendChild(this.c_body);
@@ -73,6 +79,7 @@ export default class ThermostatUI {
     this._container.appendChild(this._buildDialog());
     this._main_icon.addEventListener('click', () => this._openDialog());
     this._modes_dialog.addEventListener('click', () => this._hideDialog());
+    this._updateText('title', config.title);
   }
 
   updateState(options,hass) {
@@ -307,6 +314,11 @@ export default class ThermostatUI {
     if (this.in_control && id == 'target' && this.dual) {
       lblTarget[0].textContent = '·';
     }
+
+    if(id =='title'){
+      lblTarget[0].textContent = value;
+      lblTarget[1].textContent = '';
+    }
   }
 
   _updateTemperatureSlot(value, offset, slot) {
@@ -431,20 +443,6 @@ export default class ThermostatUI {
     }, config.pending * 1000);
     e.stopPropagation();
   }
-
-  _buildTitle(title) {
-    this._ic = document.createElement('div');
-    this._ic.className = "prop";
-    this._ic.innerHTML = `
-      <paper-icon-button icon="hass:dots-vertical" class="c_icon" role="button" tabindex="0" aria-disabled="false"></paper-icon-button>
-    `;
-    this._container.innerHTML = `
-      <div class="c_title">
-        <div>${title}</div>
-      </div>
-    `;
-    return this._ic;
-  }
   _load_icon(state, ic_name){
     
     let ic_dot = 'dot_r'
@@ -528,7 +526,7 @@ export default class ThermostatUI {
   _buildText(radius, name, offset) {
     const target = SvgUtil.createSVGElement('text', {
       x: radius + offset,
-      y: radius,
+      y: radius-(name=='title'?radius/2:0),
       class: `dial__lbl dial__lbl--${name}`,
       id: name
     });

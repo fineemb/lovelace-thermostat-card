@@ -1,6 +1,6 @@
-import {cssData} from './styles.js?v=1.2.9';
-import ThermostatUI from './thermostat_card.lib.js?v=1.2.9';
-console.info("%c Thermostat Card \n%c  Version  1.2.9 ", "color: orange; font-weight: bold; background: black", "color: white; font-weight: bold; background: dimgray");
+import {cssData} from './styles.js?v=1.3.0';
+import ThermostatUI from './thermostat_card.lib.js?v=1.3.0';
+console.info("%c Thermostat Card \n%c  Version  1.3.0 ", "color: orange; font-weight: bold; background: black", "color: white; font-weight: bold; background: dimgray");
 class ThermostatCard extends HTMLElement {
   constructor() {
     super();
@@ -9,7 +9,8 @@ class ThermostatCard extends HTMLElement {
   set hass(hass) {
     const config = this._config;
     const entity = hass.states[config.entity];
-    let ambient_temperature = entity.attributes.current_temperature;
+    if(!entity)return;
+    let ambient_temperature = entity.attributes.current_temperature || 0;
     if (config.ambient_temperature && hass.states[config.ambient_temperature])
       ambient_temperature = hass.states[config.ambient_temperature].state;
     let hvac_state = entity.state;
@@ -102,7 +103,6 @@ class ThermostatCard extends HTMLElement {
     if (!cardConfig.step) cardConfig.step = 0.5;
     if (!cardConfig.highlight_tap) cardConfig.highlight_tap = false;
     if (!cardConfig.no_card) cardConfig.no_card = false;
-    if (!cardConfig.small_i) cardConfig.small_i = false;
     if (!cardConfig.chevron_size) cardConfig.chevron_size = 50;
     if (!cardConfig.num_ticks) cardConfig.num_ticks = 150;
     if (!cardConfig.tick_degrees) cardConfig.tick_degrees = 300;
