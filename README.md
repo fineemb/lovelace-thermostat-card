@@ -35,14 +35,13 @@ Search for Thermostat Card
 1. Add the following to your Lovelace resources
     ``` yaml
     resources:
-      - url: /www/community/lovelace-thermostat-card/main.js
+      - url: /hacsfiles/lovelace-thermostat-card/main.js
         type: module
     ```
 1. Add the following to your Lovelace config `views.cards` key
     ```yaml
     - type: custom:thermostat-card
       entity: climate.gong_zuo_jian_kong_diao
-      small_i: true
       title: 工作间
     ```
     Replace `climate.gong_zuo_jian_kong_diao` with your climate's entity_id and `工作间` with any name you'd like to name your climate with
