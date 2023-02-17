@@ -46,7 +46,7 @@ export default class ThermostatUI {
 
     // this._container.appendChild(this._buildTitle(config.title));
     this._ic.addEventListener('click', () => this.openProp());
-    this._container.appendChild(this._load_icon('',''));
+    this._container.appendChild(this._load_icon('', ''));
     this.c_body = document.createElement('div');
     this.c_body.className = 'c_body';
     const root = this._buildCore(config.diameter);
@@ -69,7 +69,7 @@ export default class ThermostatUI {
     root.appendChild(this._buildChevrons(config.radius, 180, 'low', 0.7, -config.radius / 2.5));
     root.appendChild(this._buildChevrons(config.radius, 180, 'high', 0.7, config.radius / 3));
     root.appendChild(this._buildChevrons(config.radius, 180, 'target', 1, 0));
-    
+
 
     this.c_body.appendChild(root);
     this._container.appendChild(this.c_body);
@@ -82,8 +82,8 @@ export default class ThermostatUI {
     this._updateText('title', config.title);
   }
 
-  updateState(options,hass) {
-    
+  updateState(options, hass) {
+
     const config = this._config;
     const away = options.away || false;
     this.entity = options.entity;
@@ -98,7 +98,7 @@ export default class ThermostatUI {
       target: options.target_temperature,
       ambient: options.ambient_temperature,
     }
-    
+
     this._updateClass('has_dual', this.dual);
     let tick_label, from, to;
     const tick_indexes = [];
@@ -106,12 +106,61 @@ export default class ThermostatUI {
     const target_index = SvgUtil.restrictToRange(Math.round((this._target - this.min_value) / (this.max_value - this.min_value) * config.num_ticks), 0, config.num_ticks - 1);
     const high_index = SvgUtil.restrictToRange(Math.round((this._high - this.min_value) / (this.max_value - this.min_value) * config.num_ticks), 0, config.num_ticks - 1);
     const low_index = SvgUtil.restrictToRange(Math.round((this._low - this.min_value) / (this.max_value - this.min_value) * config.num_ticks), 0, config.num_ticks - 1);
-    
-    if (!this.dual) {
+
+    // Only some states support dual temp adjustment, even if the hvac is generally dual capable
+    let dual_state = (this.hvac_state == "heat_cool") || (this.hvac_state == "off")
+
+    if (this.dual && dual_state) {
+      tick_label = [this._low, this._high, this.ambient].sort();
+      this._updateTemperatureSlot(null, 0, `temperature_slot_1`);
+      this._updateTemperatureSlot(null, 0, `temperature_slot_2`);
+      this._updateTemperatureSlot(null, 0, `temperature_slot_3`);
+
+      switch (this.hvac_state) {
+        case 'heat_cool':
+          this._load_icon(this.hvac_state, 'sync');
+
+          if (high_index < ambient_index) {
+            from = high_index;
+            to = ambient_index;
+            this._updateTemperatureSlot(this.ambient, 8, `temperature_slot_3`);
+            this._updateTemperatureSlot(this._high, -8, `temperature_slot_2`);
+          } else if (low_index > ambient_index) {
+            from = ambient_index;
+            to = low_index;
+            this._updateTemperatureSlot(this.ambient, -8, `temperature_slot_1`);
+            this._updateTemperatureSlot(this._low, 8, `temperature_slot_2`);
+          } else {
+            this._updateTemperatureSlot(this._low, -8, `temperature_slot_1`);
+            this._updateTemperatureSlot(this._high, 8, `temperature_slot_3`);
+          }
+          break;
+
+        case 'off':
+          this._load_icon(this.hvac_state, 'power');
+
+          if (high_index < ambient_index) {
+            from = high_index;
+            to = ambient_index;
+            this._updateTemperatureSlot(this.ambient, 8, `temperature_slot_3`);
+            this._updateTemperatureSlot(this._high, -8, `temperature_slot_2`);
+          } else if (low_index > ambient_index) {
+            from = ambient_index;
+            to = low_index;
+            this._updateTemperatureSlot(this.ambient, -8, `temperature_slot_1`);
+            this._updateTemperatureSlot(this._low, 8, `temperature_slot_2`);
+          } else {
+            this._updateTemperatureSlot(this._low, -8, `temperature_slot_1`);
+            this._updateTemperatureSlot(this._high, 8, `temperature_slot_3`);
+          }
+          break;
+        default:
+      }
+    } else {
       tick_label = [this._target, this.ambient].sort();
       this._updateTemperatureSlot(tick_label[0], -8, `temperature_slot_1`);
       this._updateTemperatureSlot(tick_label[1], 8, `temperature_slot_2`);
-      
+
       switch (this.hvac_state) {
         case 'dry':
           this._load_icon(this.hvac_state, 'water-percent');
@@ -121,7 +170,7 @@ export default class ThermostatUI {
           break;
         case 'cool':
           this._load_icon(this.hvac_state, 'snowflake');
-          
+
           if (target_index <= ambient_index) {
             from = target_index;
             to = ambient_index;
@@ -129,7 +178,7 @@ export default class ThermostatUI {
           break;
         case 'heat':
           this._load_icon(this.hvac_state, 'fire');
-          
+
           if (target_index >= ambient_index) {
             from = ambient_index;
             to = target_index;
@@ -145,7 +194,7 @@ export default class ThermostatUI {
           break;
         case 'auto':
           this._load_icon(this.hvac_state, 'atom');
-          
+
           if (target_index >= ambient_index) {
             from = ambient_index;
             to = target_index;
@@ -157,76 +206,14 @@ export default class ThermostatUI {
         default:
           this._load_icon('more', 'dots-horizontal');
       }
-    } else {
-      tick_label = [this._low, this._high, this.ambient].sort();
-      this._updateTemperatureSlot(null, 0, `temperature_slot_1`);
-      this._updateTemperatureSlot(null, 0, `temperature_slot_2`);
-      this._updateTemperatureSlot(null, 0, `temperature_slot_3`);
-
-      switch (this.hvac_state) {
-        case 'cool':
-          this._load_icon(this.hvac_state, 'snowflake');
-
-          if (high_index < ambient_index) {
-            from = high_index;
-            to = ambient_index;
-            this._updateTemperatureSlot(this.ambient, 8, `temperature_slot_3`);
-            this._updateTemperatureSlot(this._high, -8, `temperature_slot_2`);
-          }
-          break;
-        case 'heat':
-          this._load_icon(this.hvac_state, 'fire');
-
-          if (low_index > ambient_index) {
-            from = ambient_index;
-            to = low_index;
-            this._updateTemperatureSlot(this.ambient, -8, `temperature_slot_1`);
-            this._updateTemperatureSlot(this._low, 8, `temperature_slot_2`);
-          }
-          break;
-        case 'heat_cool':
-          this._load_icon(this.hvac_state, 'sync');
-
-          if (high_index < ambient_index) {
-            from = high_index;
-            to = ambient_index;
-            this._updateTemperatureSlot(this.ambient, 8, `temperature_slot_3`);
-            this._updateTemperatureSlot(this._high, -8, `temperature_slot_2`);
-          }
-          if (low_index > ambient_index) {
-            from = ambient_index;
-            to = low_index;
-            this._updateTemperatureSlot(this.ambient, -8, `temperature_slot_1`);
-            this._updateTemperatureSlot(this._low, 8, `temperature_slot_2`);
-          }
-          break;
-
-        case 'off':
-          this._load_icon(this.hvac_state, 'power');
-
-          if (high_index < ambient_index) {
-            from = high_index;
-            to = ambient_index;
-            this._updateTemperatureSlot(this.ambient, 8, `temperature_slot_3`);
-            this._updateTemperatureSlot(this._high, -8, `temperature_slot_2`);
-          }
-          if (low_index > ambient_index) {
-            from = ambient_index;
-            to = low_index;
-            this._updateTemperatureSlot(this.ambient, -8, `temperature_slot_1`);
-            this._updateTemperatureSlot(this._low, 8, `temperature_slot_2`);
-          }
-          break;
-        default:
-      }
     }
-    
+
     tick_label.forEach(item => tick_indexes.push(SvgUtil.restrictToRange(Math.round((item - this.min_value) / (this.max_value - this.min_value) * config.num_ticks), 0, config.num_ticks - 1)));
     this._updateTicks(from, to, tick_indexes, this.hvac_state);
     // this._updateColor(this.hvac_state, this.preset_mode);
     this._updateText('ambient', this.ambient);
     this._updateEdit(false);
-    this._updateDialog(this.hvac_modes,hass);
+    this._updateDialog(this.hvac_modes, hass);
   }
 
   _temperatureControlClicked(index) {
@@ -341,23 +328,23 @@ export default class ThermostatUI {
         lblTarget[1].textContent = '';
       }
     }
-    
+
     if (this.in_control && id == 'target' && this.dual) {
       lblTarget[0].textContent = '·';
     }
 
-    if(id =='title'){
+    if (id == 'title') {
       lblTarget[0].textContent = value;
       lblTarget[1].textContent = '';
     }
   }
 
   _updateTemperatureSlot(value, offset, slot) {
-    
+
     const config = this._config;
     const lblSlot1 = this._root.querySelector(`#${slot}`)
     lblSlot1.textContent = value != null ? SvgUtil.superscript(value) : '';
-    
+
     const peggedValue = SvgUtil.restrictToRange(value, this.min_value, this.max_value);
     const position = [config.radius, config.ticks_outer_radius - (config.ticks_outer_radius - config.ticks_inner_radius) / 2];
     let degs = config.tick_degrees * (peggedValue - this.min_value) / (this.max_value - this.min_value) - config.offset_degrees + offset;
@@ -369,11 +356,11 @@ export default class ThermostatUI {
   }
 
   _updateColor(state, preset_mode) {
-    
-    if(Object.prototype.toString.call(preset_mode) === "[object String]"){
 
-      if(state != 'off' && preset_mode.toLowerCase() == 'idle')
-      state = 'idle'
+    if (Object.prototype.toString.call(preset_mode) === "[object String]") {
+
+      if (state != 'off' && preset_mode.toLowerCase() == 'idle')
+        state = 'idle'
       this._root.classList.forEach(c => {
         if (c.indexOf('dial--state--') != -1)
           this._root.classList.remove(c);
@@ -400,7 +387,7 @@ export default class ThermostatUI {
 
     this._ticks.forEach((tick, index) => {
       let isLarge = false;
-      let isActive = (index >= from && index <= to) ? 'active '+hvac_state : '';
+      let isActive = (index >= from && index <= to) ? 'active ' + hvac_state : '';
       large_ticks.forEach(i => isLarge = isLarge || (index == i));
       if (isLarge) isActive += ' large';
       const theta = config.tick_degrees / config.num_ticks;
@@ -410,9 +397,9 @@ export default class ThermostatUI {
       });
     });
   }
-  _updateDialog(modes,hass){
+  _updateDialog(modes, hass) {
     this._modes_dialog.innerHTML = "";
-    for(var i=0;i<modes.length;i++){
+    for (var i = 0; i < modes.length; i++) {
       let icon;
       let mode = modes[i];
       switch (mode) {
@@ -442,7 +429,7 @@ export default class ThermostatUI {
       }
       let d = document.createElement('span');
       d.innerHTML = `<ha-icon class="modeicon ${mode}" icon="mdi:${icon}"></ha-icon>`
-      d.addEventListener('click', (e) => this._setMode(e,mode,hass));
+      d.addEventListener('click', (e) => this._setMode(e, mode, hass));
       //this._modes[i].push(d);
       this._modes_dialog.appendChild(d)
     }
@@ -459,13 +446,13 @@ export default class ThermostatUI {
   openProp() {
     this._config.propWin(this.entity.entity_id)
   }
-  _openDialog(){
+  _openDialog() {
     this._modes_dialog.className = "dialog modes";
   }
-  _hideDialog(){
+  _hideDialog() {
     this._modes_dialog.className = "dialog modes hide";
   }
-  _setMode(e, mode,hass){
+  _setMode(e, mode, hass) {
     console.log(mode);
     let config = this._config;
     if (this._timeoutHandlerMode) clearTimeout(this._timeoutHandlerMode);
@@ -473,19 +460,19 @@ export default class ThermostatUI {
       entity_id: this._config.entity,
       hvac_mode: mode,
     });
-    this._modes_dialog.className = "dialog modes "+mode+" pending";
+    this._modes_dialog.className = "dialog modes " + mode + " pending";
     this._timeoutHandlerMode = setTimeout(() => {
       this._modes_dialog.className = "dialog modes hide";
     }, config.pending * 1000);
     e.stopPropagation();
   }
-  _load_icon(state, ic_name){
-    
+  _load_icon(state, ic_name) {
+
     let ic_dot = 'dot_r'
-    if(ic_name == ''){
+    if (ic_name == '') {
       ic_dot = 'dot_h'
     }
-    
+
     this._main_icon.innerHTML = `
       <div class="climate_info">
         <div class="mode_color"><span class="${ic_dot}"></span></div>
@@ -494,7 +481,7 @@ export default class ThermostatUI {
     `;
     return this._main_icon;
   }
-  _buildDialog(){
+  _buildDialog() {
     this._modes_dialog.className = "dialog modes hide";
     return this._modes_dialog;
   }
@@ -526,7 +513,7 @@ export default class ThermostatUI {
     }
     return tick_element;
   }
-  
+
   _buildChevrons(radius, rotation, id, scale, offset) {
     const config = this._config;
     const translation = rotation > 0 ? -1 : 1;
@@ -562,7 +549,7 @@ export default class ThermostatUI {
   _buildText(radius, name, offset) {
     const target = SvgUtil.createSVGElement('text', {
       x: radius + offset,
-      y: radius-(name=='title'?radius/2:0),
+      y: radius - (name == 'title' ? radius / 2 : 0),
       class: `dial__lbl dial__lbl--${name}`,
       id: name
     });
@@ -644,9 +631,9 @@ class SvgUtil {
   }
 
   static superscript(n) {
-   
+
     if ((n - Math.floor(n)) !== 0)
-      n  = Number(n).toFixed(1);;
+      n = Number(n).toFixed(1);;
     const x = `${n}${n == 0 ? '' : ''}`;
     return x;
   }
@@ -658,8 +645,8 @@ class SvgUtil {
     return val;
   }
   static setClass(el, className, state) {
-    
-    
+
+
     el.classList[state ? 'add' : 'remove'](className);
   }
 
