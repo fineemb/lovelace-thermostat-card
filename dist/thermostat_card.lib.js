@@ -135,6 +135,14 @@ export default class ThermostatUI {
             to = target_index;
           }
           break;
+        case 'heat_cool':
+          this._load_icon(this.hvac_state, 'sync');
+
+          if (target_index >= ambient_index) {
+            from = ambient_index;
+            to = target_index;
+          }
+          break;
         case 'auto':
           this._load_icon(this.hvac_state, 'atom');
           
@@ -157,6 +165,8 @@ export default class ThermostatUI {
 
       switch (this.hvac_state) {
         case 'cool':
+          this._load_icon(this.hvac_state, 'snowflake');
+
           if (high_index < ambient_index) {
             from = high_index;
             to = ambient_index;
@@ -165,6 +175,8 @@ export default class ThermostatUI {
           }
           break;
         case 'heat':
+          this._load_icon(this.hvac_state, 'fire');
+
           if (low_index > ambient_index) {
             from = ambient_index;
             to = low_index;
@@ -172,7 +184,26 @@ export default class ThermostatUI {
             this._updateTemperatureSlot(this._low, 8, `temperature_slot_2`);
           }
           break;
+        case 'heat_cool':
+          this._load_icon(this.hvac_state, 'sync');
+
+          if (high_index < ambient_index) {
+            from = high_index;
+            to = ambient_index;
+            this._updateTemperatureSlot(this.ambient, 8, `temperature_slot_3`);
+            this._updateTemperatureSlot(this._high, -8, `temperature_slot_2`);
+          }
+          if (low_index > ambient_index) {
+            from = ambient_index;
+            to = low_index;
+            this._updateTemperatureSlot(this.ambient, -8, `temperature_slot_1`);
+            this._updateTemperatureSlot(this._low, 8, `temperature_slot_2`);
+          }
+          break;
+
         case 'off':
+          this._load_icon(this.hvac_state, 'power');
+
           if (high_index < ambient_index) {
             from = high_index;
             to = ambient_index;
@@ -400,9 +431,14 @@ export default class ThermostatUI {
         case 'auto':
           icon = 'atom';
           break;
+        case 'heat_cool':
+          icon = 'sync';
+          break;
         case 'off':
           icon = 'power';
           break;
+        default:
+          icon = 'help';
       }
       let d = document.createElement('span');
       d.innerHTML = `<ha-icon class="modeicon ${mode}" icon="mdi:${icon}"></ha-icon>`
