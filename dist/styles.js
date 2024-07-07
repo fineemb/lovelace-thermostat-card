@@ -87,6 +87,7 @@ export function cssData(user) {
   }
   .modes, .mode_color{
     position: absolute;
+    max-width: 50px;
     top: 50%;
     left: 50%;
     width: 100%;
@@ -101,6 +102,8 @@ export function cssData(user) {
     background-color:#0000008c;
     width: 90%;
     height: 90%;
+    max-width: 300px;
+    min-width: 150px;
     margin: 5%;
     border-radius: 50%;
     display: flex;
@@ -154,7 +157,10 @@ export function cssData(user) {
   
   .dial {
     user-select: none;
-  
+    max-width: 300px;
+    min-width: 150px;
+    display: block;
+    margin: 0 auto;
     --thermostat-off-fill: #000000c2;
     --thermostat-path-color: rgba(255, 255, 255, 0.3);
     --thermostat-path-active-color: rgba(255, 255, 255, 0.8);
