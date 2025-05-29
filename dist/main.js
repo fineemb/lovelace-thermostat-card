@@ -10,6 +10,12 @@ class ThermostatCard extends HTMLElement {
     const config = this._config;
     const entity = hass.states[config.entity];
     if(!entity)return;
+    let min_value = entity.attributes.min_temp;
+    if (config.min_value)
+      min_value = config.min_value;
+    let max_value = entity.attributes.max_temp;
+    if (config.max_value)
+      max_value = config.max_value;
     let ambient_temperature = entity.attributes.current_temperature || 0;
     if (config.ambient_temperature && hass.states[config.ambient_temperature])
       ambient_temperature = hass.states[config.ambient_temperature].state;
@@ -17,8 +23,8 @@ class ThermostatCard extends HTMLElement {
     
     const new_state = {
       entity: entity,
-      min_value: entity.attributes.min_temp,
-      max_value: entity.attributes.max_temp,
+      min_value: min_value,
+      max_value: max_value,
       ambient_temperature: ambient_temperature,
       target_temperature: entity.attributes.temperature,
       target_temperature_low: entity.attributes.target_temp_low,
