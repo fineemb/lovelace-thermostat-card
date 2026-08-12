@@ -640,6 +640,7 @@ class SvgUtil {
 
   // Restrict a number to a min + max range
   static restrictToRange(val, min, max) {
+    if (isNaN(val)) return min;
     if (val < min) return min;
     if (val > max) return max;
     return val;

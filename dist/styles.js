@@ -161,11 +161,6 @@ export function cssData(user) {
     min-width: 150px;
     display: block;
     margin: 0 auto;
-    --thermostat-off-fill: #000000c2;
-    --thermostat-path-color: rgba(255, 255, 255, 0.3);
-    --thermostat-path-active-color: rgba(255, 255, 255, 0.8);
-    --thermostat-path-active-color-large: rgba(255, 255, 255, 1);
-    --thermostat-text-color: white;
   }
   
   .dial.has-thermo .dial__ico__leaf {
@@ -173,11 +168,11 @@ export function cssData(user) {
   }
   .dial .dial__shape {
     transition: fill 0.5s;
-    fill: var(--thermostat-off-fill);
+    fill: var(--thermostat-off-fill, #000000c2);
   }
   
   .dial__ico__thermo {
-    fill: var(--thermostat-path-active-color);
+    fill: var(--thermostat-path-active-color, rgba(255, 255, 255, 0.8));
     opacity: 0;
     transition: opacity 0.5s;
     pointer-events: none;
@@ -205,7 +200,7 @@ export function cssData(user) {
     opacity: 1;
   }
   .dial--state--off .dial__shape {
-    fill: var(--thermostat-off-fill);
+    fill: var(--thermostat-off-fill, #000000c2);
   }
   .dial--state--heat .dial__shape {
     fill: var(--heat_colorc);
@@ -226,7 +221,7 @@ export function cssData(user) {
     fill: var(--idle_color);
   }
   .dial__ticks path {
-    fill: var(--thermostat-path-color);
+    fill: var(--thermostat-path-color, rgba(255, 255, 255, 0.3));
   }
   .dial__ticks path.active {
     fill: var(--mode_color);
@@ -235,7 +230,7 @@ export function cssData(user) {
     fill: var(--mode_color);
   }
   .dial text, .dial text tspan {
-    fill: var(--thermostat-text-color);
+    fill: var(--thermostat-text-color, white);
     text-anchor: middle;
     font-family: Helvetica, sans-serif;
     alignment-baseline: central;
@@ -278,7 +273,7 @@ export function cssData(user) {
   .dial .dial__chevron {
     visibility: hidden;
     fill: none;
-    stroke: var(--thermostat-text-color);
+    stroke: var(--thermostat-text-color, white);
     stroke-width: 4px;
     opacity: 0.3;
   }

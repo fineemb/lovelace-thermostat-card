@@ -1,24 +1,150 @@
-import {cssData} from './styles.js?v=1.3.0';
-import ThermostatUI from './thermostat_card.lib.js?v=1.3.0';
-console.info("%c Thermostat Card \n%c  Version  1.3.0 ", "color: orange; font-weight: bold; background: black", "color: white; font-weight: bold; background: dimgray");
+import {cssData} from './styles.js?v=1.4.0';
+import ThermostatUI from './thermostat_card.lib.js?v=1.4.0';
+console.info("%c Thermostat Card \n%c  Version  1.4.0 ", "color: orange; font-weight: bold; background: black", "color: white; font-weight: bold; background: dimgray");
+
+const CARD_EDITOR_LABELS = {
+  zh: {
+    min_value: "最低温度",
+    max_value: "最高温度",
+    ambient_temperature: "环境温度实体",
+    step: "调节步长",
+    pending: "待发送时间（秒）",
+    idle_zone: "双温区最小间隔",
+    chevron_size: "调节箭头大小",
+    num_ticks: "刻度数量",
+    tick_degrees: "刻度覆盖角度",
+    diameter: "表盘直径",
+    highlight_tap: "点击时高亮显示",
+    no_card: "不使用卡片背景",
+  },
+  en: {
+    min_value: "Minimum temperature",
+    max_value: "Maximum temperature",
+    ambient_temperature: "Ambient temperature entity",
+    step: "Step",
+    pending: "Pending (seconds)",
+    idle_zone: "Idle zone",
+    chevron_size: "Chevron size",
+    num_ticks: "Number of ticks",
+    tick_degrees: "Tick degrees",
+    diameter: "Dial diameter",
+    highlight_tap: "Highlight tap",
+    no_card: "No card background",
+  },
+};
+
 class ThermostatCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+  }
+  static getConfigForm() {
+    return {
+      schema: [
+        {
+          name: "entity",
+          selector: { entity: { domain: "climate" } },
+          required: true,
+        },
+        {
+          name: "title",
+          selector: { text: {} },
+        },
+        {
+          name: "ambient_temperature",
+          selector: { entity: { domain: "sensor" } },
+        },
+        {
+          name: "min_value",
+          selector: { number: { mode: "box" } },
+        },
+        {
+          name: "max_value",
+          selector: { number: { mode: "box" } },
+        },
+        {
+          name: "step",
+          selector: { number: { min: 0.1, max: 5, step: 0.1, mode: "box" } },
+          default: 0.5,
+        },
+        {
+          name: "pending",
+          selector: { number: { min: 1, max: 30, step: 1, mode: "box" } },
+          default: 3,
+        },
+        {
+          name: "idle_zone",
+          selector: { number: { min: 0, max: 10, step: 0.5, mode: "box" } },
+          default: 2,
+        },
+        {
+          name: "chevron_size",
+          selector: { number: { min: 20, max: 120, step: 5, mode: "box" } },
+          default: 50,
+        },
+        {
+          name: "num_ticks",
+          selector: { number: { min: 30, max: 300, step: 10, mode: "box" } },
+          default: 150,
+        },
+        {
+          name: "tick_degrees",
+          selector: { number: { min: 90, max: 360, step: 10, mode: "box" } },
+          default: 300,
+        },
+        {
+          name: "diameter",
+          selector: { number: { min: 150, max: 800, step: 10, mode: "box" } },
+          default: 400,
+        },
+        {
+          name: "highlight_tap",
+          selector: { boolean: {} },
+          default: false,
+        },
+        {
+          name: "no_card",
+          selector: { boolean: {} },
+          default: false,
+        },
+      ],
+      computeLabel(schema, localize) {
+        const name = schema.name;
+        // If HA has a translation for this field, let HA provide the label.
+        if (localize(`ui.panel.lovelace.editor.card.generic.${name}`)) {
+          return undefined;
+        }
+        // Otherwise use the card's own translations (Chinese/English by default).
+        const lang = /[\u4e00-\u9fff]/.test(localize("state.default.unknown"))
+          ? "zh"
+          : "en";
+        return CARD_EDITOR_LABELS[lang][name];
+      },
+    };
+  }
+  static getStubConfig(hass, entities, entitiesFallback) {
+    const candidates = (entities && entities.length ? entities : entitiesFallback) || [];
+    const climate = candidates.find((entity) => entity.startsWith("climate."));
+    return climate ? { entity: climate } : {};
   }
   set hass(hass) {
     const config = this._config;
     const entity = hass.states[config.entity];
     if(!entity)return;
     let min_value = entity.attributes.min_temp;
-    if (config.min_value)
+    if (config.min_value !== undefined && config.min_value !== null)
       min_value = config.min_value;
     let max_value = entity.attributes.max_temp;
-    if (config.max_value)
+    if (config.max_value !== undefined && config.max_value !== null)
       max_value = config.max_value;
+    if (min_value === undefined || min_value === null || isNaN(min_value)) min_value = 7;
+    if (max_value === undefined || max_value === null || isNaN(max_value)) max_value = 35;
     let ambient_temperature = entity.attributes.current_temperature || 0;
-    if (config.ambient_temperature && hass.states[config.ambient_temperature])
-      ambient_temperature = hass.states[config.ambient_temperature].state;
+    if (config.ambient_temperature && hass.states[config.ambient_temperature]) {
+      const sensor_value = parseFloat(hass.states[config.ambient_temperature].state);
+      if (!isNaN(sensor_value))
+        ambient_temperature = sensor_value;
+    }
     let hvac_state = entity.state;
     
     const new_state = {
@@ -90,8 +216,8 @@ class ThermostatCard extends HTMLElement {
 
   setConfig(config) {
     // Check config
-    if (!config.entity && config.entity.split(".")[0] === 'climate') {
-      throw new Error('Please define an entity');
+    if (!config || !config.entity || config.entity.split(".")[0] !== 'climate') {
+      throw new Error('Please define a valid climate entity');
     }
 
     // Cleanup DOM
@@ -146,6 +272,17 @@ class ThermostatCard extends HTMLElement {
   }
 }
 customElements.define('thermostat-card', ThermostatCard);
+
+if (!window.customCards) window.customCards = [];
+if (!window.customCards.some((card) => card.type === 'thermostat-card')) {
+  window.customCards.push({
+    type: 'thermostat-card',
+    name: 'Thermostat Card',
+    description: 'A simple thermostat card for climate entities',
+    preview: false,
+    documentationURL: 'https://github.com/fineemb/lovelace-thermostat-card',
+  });
+}
 
 function deepClone(value) {
   if (!(!!value && typeof value == 'object')) {
